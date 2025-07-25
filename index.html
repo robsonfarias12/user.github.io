@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Análise de Bem-Estar Mental</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            color: #6c757d;
+        }
+
+        .nav-tab.active {
+            background: white;
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .nav-tab:hover {
+            background: #e9ecef;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 30px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .scale-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .scale-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .scale-item:hover {
+            background: #e9ecef;
+        }
+
+        .scale-item.selected {
+            background: #667eea;
+            color: white;
+            border-color: #5a67d8;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #6c757d, #495057);
+        }
+
+        .result-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid #667eea;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .status-good {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-attention {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-concern {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .recommendation {
+            background: #e7f3ff;
+            border-left: 4px solid #007bff;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+
+        .chart-container {
+            width: 100%;
+            height: 300px;
+            margin: 20px 0;
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .history-item {
+            background: white;
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .emergency-banner {
+            background: #dc3545;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-tabs {
+                flex-direction: column;
+            }
+            
+            .scale-group {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Sistema de Análise de Bem-Estar Mental</h1>
+            <p>Ferramenta avançada para monitoramento e suporte da saúde mental</p>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="switchTab('assessment')">Avaliação</button>
+            <button class="nav-tab" onclick="switchTab('history')">Histórico</button>
+            <button class="nav-tab" onclick="switchTab('resources')">Recursos</button>
+            <button class="nav-tab" onclick="switchTab('emergency')">Emergência</button>
+        </div>
+
+        <!-- Tab: Avaliação -->
+        <div id="assessment" class="tab-content active">
+            <h2>Avaliação de Bem-Estar Mental</h2>
+            
+            <form id="assessmentForm">
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="name">Nome:</label>
+                        <input type="text" id="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="age">Idade:</label>
+                        <input type="number" id="age" min="1" max="120" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Como você se sente hoje? (1-10)</label>
+                    <div class="scale-group">
+                        <div class="scale-item" onclick="selectScale('mood', 1)">
+                            <div>😢</div>
+                            <div>Muito mal (1)</div>
+                        </div>
+                        <div class="scale-item" onclick="selectScale('mood', 3)">
+                            <div>😞</div>
+                            <div>Mal (3)</div>
+                        </div>
+                        <div class="scale-item" onclick="selectScale('mood', 5)">
+                            <div>😐</div>
+                            <div>Neutro (5)</div>
+                        </div>
+                        <div class="scale-item" onclick="selectScale('mood', 7)">
+                            <div>🙂</div>
+                            <div>Bem (7)</div>
+                        </div>
+                        <div class="scale-item" onclick="selectScale('mood', 10)">
+                            <div>😊</div>
+                            <div>Muito bem (10)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Nível de ansiedade (1-10):</label>
+                    <div class="scale-group">
+                        <div class="scale-item" onclick="selectScale('anxiety', 1)">Muito baixo (1)</div>
+                        <div class="scale-item" onclick="selectScale('anxiety', 3)">Baixo (3)</div>
+                        <div class="scale-item" onclick="selectScale('anxiety', 5)">Moderado (5)</div>
+                        <div class="scale-item" onclick="selectScale('anxiety', 7)">Alto (7)</div>
+                        <div class="scale-item" onclick="selectScale('anxiety', 10)">Muito alto (10)</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Qualidade do sono (1-10):</label>
+                    <div class="scale-group">
+                        <div class="scale-item" onclick="selectScale('sleep', 1)">Muito ruim (1)</div>
+                        <div class="scale-item" onclick="selectScale('sleep', 3)">Ruim (3)</div>
+                        <div class="scale-item" onclick="selectScale('sleep', 5)">Regular (5)</div>
+                        <div class="scale-item" onclick="selectScale('sleep', 7)">Boa (7)</div>
+                        <div class="scale-item" onclick="selectScale('sleep', 10)">Excelente (10)</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="symptoms">Sintomas que você tem sentido:</label>
+                    <textarea id="symptoms" placeholder="Descreva qualquer sintoma físico ou emocional que tenha notado..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="stress-factors">Fatores de estresse recentes:</label>
+                    <textarea id="stress-factors" placeholder="Descreva situações estressantes que você enfrentou recentemente..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="support-system">Como está seu sistema de apoio?</label>
+                    <select id="support-system">
+                        <option value="">Selecione...</option>
+                        <option value="excellent">Excelente - Tenho muito apoio</option>
+                        <option value="good">Bom - Tenho apoio adequado</option>
+                        <option value="fair">Regular - Apoio limitado</option>
+                        <option value="poor">Ruim - Pouco ou nenhum apoio</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn">Analisar Bem-Estar</button>
+            </form>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Analisando seus dados...</p>
+            </div>
+
+            <div id="results"></div>
+        </div>
+
+        <!-- Tab: Histórico -->
+        <div id="history" class="tab-content">
+            <h2>Histórico de Avaliações</h2>
+            <div class="chart-container">
+                <canvas id="progressChart"></canvas>
+            </div>
+            <div id="historyList">
+                <p>Realize uma avaliação para começar seu histórico.</p>
+            </div>
+            <button class="btn btn-secondary" onclick="exportHistory()">Exportar Histórico</button>
+        </div>
+
+        <!-- Tab: Recursos -->
+        <div id="resources" class="tab-content">
+            <h2>Recursos de Apoio</h2>
+            
+            <div class="result-card">
+                <h3>📞 Linhas de Apoio</h3>
+                <p><strong>CVV (Centro de Valorização da Vida):</strong> 188</p>
+                <p><strong>SAMU:</strong> 192</p>
+                <p><strong>Bombeiros:</strong> 193</p>
+                <p><strong>Polícia:</strong> 190</p>
+            </div>
+
+            <div class="result-card">
+                <h3>🧘 Exercícios de Relaxamento</h3>
+                <button class="btn" onclick="startBreathingExercise()">Exercício de Respiração</button>
+                <button class="btn" onclick="startMeditation()">Meditação Guiada</button>
+            </div>
+
+            <div class="result-card">
+                <h3>📚 Recursos Educacionais</h3>
+                <ul>
+                    <li>Técnicas de mindfulness</li>
+                    <li>Gerenciamento de estresse</li>
+                    <li>Higiene do sono</li>
+                    <li>Exercícios físicos para bem-estar mental</li>
+                </ul>
+            </div>
+
+            <div class="result-card">
+                <h3>🏥 Quando Buscar Ajuda Profissional</h3>
+                <p>Procure ajuda profissional se você estiver experimentando:</p>
+                <ul>
+                    <li>Sentimentos persistentes de tristeza ou desesperança</li>
+                    <li>Ansiedade que interfere nas atividades diárias</li>
+                    <li>Problemas de sono contínuos</li>
+                    <li>Isolamento social</li>
+                    <li>Pensamentos de autolesão</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Tab: Emergência -->
+        <div id="emergency" class="tab-content">
+            <div class="emergency-banner">
+                ⚠️ ESTA É UMA SITUAÇÃO DE EMERGÊNCIA? ⚠️
+            </div>
+            
+            <div class="result-card">
+                <h3>🚨 Contatos de Emergência</h3>
+                <p><strong>Se você está em risco imediato, ligue:</strong></p>
+                <ul>
+                    <li><strong>CVV:</strong> 188 (24h, gratuito)</li>
+                    <li><strong>SAMU:</strong> 192</li>
+                    <li><strong>Polícia:</strong> 190</li>
+                    <li><strong>Bombeiros:</strong> 193</li>
+                </ul>
+            </div>
+
+            <div class="result-card">
+                <h3>🆘 Sinais de Alerta</h3>
+                <p>Procure ajuda imediata se você ou alguém próximo apresentar:</p>
+                <ul>
+                    <li>Pensamentos suicidas</li>
+                    <li>Planos de autolesão</li>
+                    <li>Desconexão completa da realidade</li>
+                    <li>Comportamento violento</li>
+                    <li>Abuso de substâncias em situação de risco</li>
+                </ul>
+            </div>
+
+            <div class="result-card">
+                <h3>🤝 Apoio Imediato</h3>
+                <button class="btn" style="background: #dc3545; font-size: 1.2em;" onclick="callEmergency()">LIGAR PARA CVV (188)</button>
+                <button class="btn" onclick="emergencyContacts()">Contatar Pessoa de Confiança</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let assessmentData = {
+            mood: null,
+            anxiety: null,
+            sleep: null
+        };
+
+        let historyData = JSON.parse(localStorage.getItem('mentalHealthHistory')) || [];
+
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+            
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+            
+            if (tabName === 'history') {
+                updateHistoryDisplay();
+            }
+        }
+
+        function selectScale(type, value) {
+            assessmentData[type] = value;
+            
+            // Remove previous selections
+            event.target.parentElement.querySelectorAll('.scale-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            
+            // Add selection to clicked item
+            event.target.classList.add('selected');
+        }
+
+        document.getElementById('assessmentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Show loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').innerHTML = '';
+            
+            // Simulate analysis delay
+            setTimeout(() => {
+                analyzeWellbeing();
+                document.getElementById('loading').style.display = 'none';
+            }, 2000);
+        });
+
+        function analyzeWellbeing() {
+            const name = document.getElementById('name').value;
+            const age = document.getElementById('age').value;
+            const symptoms = document.getElementById('symptoms').value;
+            const stressFactors = document.getElementById('stress-factors').value;
+            const supportSystem = document.getElementById('support-system').value;
+            
+            // Calculate overall score
+            const scores = [assessmentData.mood, assessmentData.anxiety, assessmentData.sleep];
+            const validScores = scores.filter(score => score !== null);
+            
+            if (validScores.length === 0) {
+                alert('Por favor, complete pelo menos uma das escalas de avaliação.');
+                return;
+            }
+            
+            const averageScore = validScores.reduce((a, b) => a + b, 0) / validScores.length;
+            const anxietyWeight = assessmentData.anxiety ? (10 - assessmentData.anxiety) / 10 : 1;
+            const adjustedScore = averageScore * anxietyWeight;
+            
+            // Determine status
+            let status, statusClass, recommendations;
+            
+            if (adjustedScore >= 7) {
+                status = "Bem-estar Positivo";
+                statusClass = "status-good";
+                recommendations = [
+                    "Continue mantendo seus hábitos saudáveis",
+                    "Pratique atividades que lhe trazem alegria",
+                    "Mantenha conexões sociais positivas",
+                    "Reserve tempo para autocuidado"
+                ];
+            } else if (adjustedScore >= 4) {
+                status = "Atenção Necessária";
+                statusClass = "status-attention";
+                recommendations = [
+                    "Considere técnicas de relaxamento e mindfulness",
+                    "Estabeleça uma rotina de sono regular",
+                    "Pratique exercícios físicos leves",
+                    "Procure conversar com amigos ou familiares",
+                    "Considere buscar apoio profissional se os sintomas persistirem"
+                ];
+            } else {
+                status = "Preocupação Significativa";
+                statusClass = "status-concern";
+                recommendations = [
+                    "Recomendamos fortemente buscar ajuda profissional",
+                    "Entre em contato com um psicólogo ou psiquiatra",
+                    "Não hesite em ligar para o CVV (188) se precisar conversar",
+                    "Envolva pessoas próximas em seu processo de cuidado",
+                    "Evite tomar decisões importantes quando se sentir muito mal"
+                ];
+            }
+            
+            // Save to history
+            const assessment = {
+                date: new Date().toISOString(),
+                name: name,
+                age: age,
+                scores: assessmentData,
+                overallScore: adjustedScore,
+                status: status,
+                symptoms: symptoms,
+                stressFactors: stressFactors,
+                supportSystem: supportSystem
+            };
+            
+            historyData.push(assessment);
+            localStorage.setItem('mentalHealthHistory', JSON.stringify(historyData));
+            
+            // Display results
+            displayResults(assessment, recommendations, statusClass);
+        }
+
+        function displayResults(assessment, recommendations, statusClass) {
+            const resultsDiv = document.getElementById('results');
+            
+            let symptomsAnalysis = "";
+            if (assessment.symptoms) {
+                symptomsAnalysis = `
+                    <div class="recommendation">
+                        <h4>Análise dos Sintomas:</h4>
+                        <p>Você relatou: "${assessment.symptoms}"</p>
+                        <p>É importante monitorar esses sintomas e discuti-los com um profissional de saúde se persistirem.</p>
+                    </div>
+                `;
+            }
+            
+            let stressAnalysis = "";
+            if (assessment.stressFactors) {
+                stressAnalysis = `
+                    <div class="recommendation">
+                        <h4>Fatores de Estresse Identificados:</h4>
+                        <p>"${assessment.stressFactors}"</p>
+                        <p>Trabalhar no gerenciamento desses fatores pode melhorar significativamente seu bem-estar.</p>
+                    </div>
+                `;
+            }
+            
+            resultsDiv.innerHTML = `
+                <div class="result-card">
+                    <h3>Resultado da Avaliação - ${assessment.name}</h3>
+                    <div class="status-indicator ${statusClass}">${assessment.status}</div>
+                    
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${(assessment.overallScore / 10) * 100}%"></div>
+                    </div>
+                    <p><strong>Pontuação Geral:</strong> ${assessment.overallScore.toFixed(1)}/10</p>
+                    
+                    <h4>Detalhes das Avaliações:</h4>
+                    <ul>
+                        ${assessment.scores.mood ? `<li><strong>Humor:</strong> ${assessment.scores.mood}/10</li>` : ''}
+                        ${assessment.scores.anxiety ? `<li><strong>Ansiedade:</strong> ${assessment.scores.anxiety}/10</li>` : ''}
+                        ${assessment.scores.sleep ? `<li><strong>Qualidade do Sono:</strong> ${assessment.scores.sleep}/10</li>` : ''}
+                    </ul>
+                    
+                    ${symptomsAnalysis}
+                    ${stressAnalysis}
+                    
+                    <div class="recommendation">
+                        <h4>Recomendações Personalizadas:</h4>
+                        <ul>
+                            ${recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                        </ul>
+                    </div>
+                    
+                    <p><strong>Data da Avaliação:</strong> ${new Date(assessment.date).toLocaleString('pt-BR')}</p>
+                    
+                    ${assessment.overallScore < 4 ? `
+                        <div style="background: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px; margin-top: 15px;">
+                            <strong>⚠️ Atenção:</strong> Sua avaliação indica necessidade de atenção imediata. 
+                            Considere buscar ajuda profissional e não hesite em entrar em contato com o CVV (188) se precisar de apoio.
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            
+            // Reset form
+            document.getElementById('assessmentForm').reset();
+            assessmentData = { mood: null, anxiety: null, sleep: null };
+            document.querySelectorAll('.scale-item').forEach(item => item.classList.remove('selected'));
+        }
+
+        function updateHistoryDisplay() {
+            const historyList = document.getElementById('historyList');
+            
+            if (historyData.length === 0) {
+                historyList.innerHTML = '<p>Realize uma avaliação para começar seu histórico.</p>';
+                return;
+            }
+            
+            const recentHistory = historyData.slice(-10).reverse();
+            
+            historyList.innerHTML = recentHistory.map(assessment => `
+                <div class="history-item">
+                    <h4>${assessment.name} - ${new Date(assessment.date).toLocaleDateString('pt-BR')}</h4>
+                    <p><strong>Status:</strong> ${assessment.status}</p>
+                    <p><strong>Pontuação:</strong> ${assessment.overallScore.toFixed(1)}/10</p>
+                    <p><strong>Humor:</strong> ${assessment.scores.mood || 'N/A'}/10 | 
+                       <strong>Ansiedade:</strong> ${assessment.scores.anxiety || 'N/A'}/10 | 
+                       <strong>Sono:</strong> ${assessment.scores.sleep || 'N/A'}/10</p>
+                </div>
+            `).join('');
+        }
+
+        function exportHistory() {
+            if (historyData.length === 0) {
+                alert('Não há dados para exportar.');
+                return;
+            }
+            
+            const csvContent = "data:text/csv;charset=utf-8," + 
+                "Data,Nome,Idade,Humor,Ansiedade,Sono,Pontuação Geral,Status\n" +
+                historyData.map(row => [
+                    new Date(row.date).toLocaleDateString('pt-BR'),
+                    row.name,
+                    row.age,
+                    row.scores.mood || '',
+                    row.scores.anxiety || '',
+                    row.scores.sleep || '',
+                    row.overallScore.toFixed(1),
+                    row.status
+                ].join(",")).join("\n");
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "historico_bem_estar_mental.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function startBreathingExercise() {
+            alert('Exercício de Respiração:\n\n1. Inspire profundamente por 4 segundos\n2. Segure a respiração por 7 segundos\n3. Expire lentamente por 8 segundos\n4. Repita 4 vezes\n\nEste exercício ajuda a reduzir a ansiedade e promover relaxamento.');
+        }
+
+        function startMeditation() {
+            alert('Meditação Guiada de 5 minutos:\n\n1. Sente-se confortavelmente\n2. Feche os olhos\n3. Concentre-se na sua respiração\n4. Quando pensamentos surgirem, gentilmente retorne o foco à respiração\n5. Continue por 5 minutos\n\nA meditação regular pode melhorar significativamente o bem-estar mental.');
+        }
+
+        function callEmergency() {
+            if (confirm('Você será redirecionado para ligar para o CVV (188). Esta é uma linha de apoio emocional gratuita e confidencial, disponível 24h por dia.')) {
+                window.open('tel:188');
+            }
+        }
+
+        function emergencyContacts() {
+            const contact = prompt('Digite o número de telefone de uma pessoa de confiança para contatar:');
+            if (contact) {
+                if (confirm(`Ligar para ${contact}?`)) {
+                    window.open(`tel:${contact}`);
+                }
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateHistoryDisplay();
+        });
+    </script>
+</body>
+</html>
